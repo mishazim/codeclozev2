@@ -1,13 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Train your pattern recognition for data structures and algorithms — one blank at a time." />
-    <title>CodeCloze — DS&A Pattern Trainer</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CodeCloze v2 — Daily Coding Challenge</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <span class="logo">CodeCloze<span class="logo-accent">v2</span></span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-mode="daily">Daily</button>
+      <button class="tab" data-mode="practice">Practice</button>
+    </nav>
+    <div class="header-right">
+      <span class="streak" id="streak-display" title="Consecutive days solved">🔥 0</span>
+    </div>
+  </header>
+
+  <main id="app-root" class="app-root">
+    <!-- rendered by app.js -->
+  </main>
+
+  <footer class="app-footer">
+    <span>Optimal solutions fact-checked by compiling/running every reference in Node, Python, javac, gcc, and g++ — see <code>verify/</code>.</span>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>

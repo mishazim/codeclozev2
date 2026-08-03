@@ -1,142 +1,38 @@
-```text
- ██████╗ ██████╗ ██████╗ ███████╗ ██████╗██╗      ██████╗ ███████╗███████╗
-██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔════╝██║     ██╔═══██╗╚══███╔╝██╔════╝
-██║     ██║   ██║██║  ██║█████╗  ██║     ██║     ██║   ██║  ███╔╝ █████╗
-██║     ██║   ██║██║  ██║██╔══╝  ██║     ██║     ██║   ██║ ███╔╝  ██╔══╝
-╚██████╗╚██████╔╝██████╔╝███████╗╚██████╗███████╗╚██████╔╝███████╗███████╗
- ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝ ╚═════╝╚══════╝ ╚═════╝ ╚══════╝╚══════╝
-              // D S & A   P A T T E R N   T R A I N E R
+# CodeCloze v2 (working name)
+
+A daily coding-challenge site — fork of [CodeCloze](https://github.com/mishazim/codecloze), reimagined as a single-page, no-build static site.
+
+**What's different from the original:** one puzzle a day (algorithm/data-structure name shown upfront, no guessing), a calmer dark theme, free-form code entry graded for real, coaching after 5 failed attempts, and the optimal solution (time/space complexity + real-world use cases) always revealed at the end — even if your own working solution wasn't optimal.
+
+## Running it
+
+Plain HTML/CSS/JS — no build step, no npm install, no CDN. **JavaScript execution runs in a Web Worker for infinite-loop safety, and Chrome blocks Workers on `file://` pages**, so serve the folder instead of double-clicking `index.html`:
+
+```
+python -m http.server 8000
 ```
 
-<div align="center">
+then open `http://localhost:8000/`. (Firefox will actually run it directly from `file://`, but the local-server route works everywhere.)
 
-`> fill the blanks · earn stars · master DS&A`
+## How grading works
 
-![React](https://img.shields.io/badge/React-19-00f5ff?style=flat-square&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-8-00ff41?style=flat-square&logo=vite&logoColor=black)
-![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-00f5ff?style=flat-square&logo=tailwindcss&logoColor=black)
-![Router](https://img.shields.io/badge/React_Router-7-00ff41?style=flat-square&logo=reactrouter&logoColor=black)
-[![play](https://img.shields.io/badge/▶_play_live-00ff41?style=flat-square)](https://mishazim.github.io/codecloze/)
+- **JavaScript**: your code actually runs, in an isolated Web Worker with a 2-second timeout, against each problem's real test cases.
+- **Python / Java / C / C++**: not executed (no WASM runtime — keeps this a true offline static site). Instead your submission is pattern-matched against the structural shape of the verified reference solution. This is checked by structure, not executed — the UI says so next to the language picker.
 
-**▶ Play it live → [mishazim.github.io/codecloze](https://mishazim.github.io/codecloze/)**
+## Content
 
-</div>
+16 hand-picked problems. Every **optimal** solution (all 5 languages) and every **naive/contrast** solution (JavaScript + Python) was independently compiled/run before being written into `data.js` — see `verify/`:
 
-```text
-> INITIALIZING PATTERN RECOGNITION TRAINING MODULE...
-> [ TERMINAL ACTIVE ]
-```
+- `verify/verify.mjs` — node, JS solutions
+- `verify/verify.py` — python, Python solutions
+- `verify/Verify.java` — javac + java, Java solutions
+- `verify/verify.c` — gcc, C solutions
+- `verify/verify.cpp` — g++, C++ solutions
+- `verify/verify_data.mjs` — re-runs the exact JS code strings living in `data.js` (not a separate copy) against every test case, so transcription errors get caught too
 
-## `>` ABOUT
+## Files
 
-**CodeCloze** is a Wordle-style, fill-in-the-blank browser game for drilling
-**data structures & algorithms** pattern recognition. You're shown a code
-snippet with key tokens blanked out — type them back in, watch them flash
-green (correct) or red (wrong), and earn stars for clean, hint-free solves.
-
-It's wrapped in a CRT / hacker-terminal aesthetic: monospace Cascadia Code,
-scanlines, a vignette glow, animated `█` cursors, and ASCII progress bars.
-
-## `>` FEATURES
-
-```text
-[+] Fill-in-the-blank code snippets across two categories
-[+] 4 difficulty ranks with distinct neon color signatures
-[+] 10 attempts per level · click the blurred title for a hint
-[+] ★★★ scoring — three stars for a hint-free first-try solve
-[+] Progress persisted locally (localStorage) — pick up where you left off
-[+] Full keyboard navigation (arrow keys + Ctrl+Enter to EXECUTE)
-[+] Retro terminal UI: scanlines, glow, glitch + boot animations
-```
-
-## `>` DIFFICULTY RANKS
-
-| Signal | Rank | Tier | Category |
-|:------:|:-----|:-----|:---------|
-| 🟢 | `[ RANK-1 ]` | **EASY**   | `ALGORITHMS` / `DATA_STRUCTURES` |
-| 🟡 | `[ RANK-2 ]` | **MEDIUM** | `ALGORITHMS` / `DATA_STRUCTURES` |
-| 🔴 | `[ RANK-3 ]` | **HARD**   | `ALGORITHMS` / `DATA_STRUCTURES` |
-| 🟣 | `[ RANK-4 ]` | **EXPERT** | `ALGORITHMS` / `DATA_STRUCTURES` |
-
-> Ranks are **recognition difficulty** (how hard the pattern is to recall),
-> not raw time/space complexity. 100+ levels and counting.
-
-## `>` HOW TO PLAY
-
-```text
-01. SELECT CATEGORY ........ ALGORITHMS or DATA_STRUCTURES
-02. CHOOSE RANK ............ difficulty 1–4
-03. FILL THE BLANKS ........ type the missing tokens in the snippet
-04. EXECUTE ............... submit with [ EXECUTE ] or Ctrl+Enter
-05. READ THE SIGNAL ........ blanks flash green (✓) or red (✗)
-06. NEED A HINT? .......... click the blurred title (costs your ★★★)
-07. SCORE ................. solve hint-free on the first try for ★★★
-```
-
-## `>` QUICKSTART
-
-```bash
-> git clone https://github.com/mishazim/codecloze.git
-> cd codecloze
-> npm install
-> npm run dev        # boot the dev server (Vite)  →  http://localhost:5173
-```
-
-```bash
-> npm run build      # production build → ./dist
-> npm run preview    # serve the production build locally
-> npm run lint       # eslint
-```
-
-## `>` TECH STACK
-
-```text
-FRONTEND ...... React 19 · React Router 7
-BUILD ......... Vite 8
-STYLING ....... Tailwind CSS v4 · custom CRT theme · Cascadia Code
-STATE ......... React hooks + Context · localStorage persistence
-```
-
-## `>` CONTENT SOURCE
-
-Level content was seeded from my own interview-prep spreadsheet, included in
-this repo for reference:
-
-📄 [`reference/SWE_Interview_Algorithms.xlsx`](reference/SWE_Interview_Algorithms.xlsx)
-— algorithms, data structures, a Big-O cheat sheet, and common interview
-questions. It's what inspired CodeCloze in the first place.
-
-📄 [`reference/CodeCloze_Cheatsheet.xlsx`](reference/CodeCloze_Cheatsheet.xlsx)
-— **answer key** (⚠️ spoilers) for every level: filled Python / Java / C++
-solutions, per-blank answers, and best-case / worst-case / space Big-O,
-organized into 8 tabs by category × difficulty.
-
-## `>` ROADMAP
-
-```text
-[x] Core game loop, ★ scoring, 4 ranks, progress persistence
-[x] Terminal UI: scanlines, glow, boot/glitch animations
-[x] Automated structural + syntax validation (270 snippets) — see scripts/
-[x] Live demo on GitHub Pages — mishazim.github.io/codecloze
-[ ] Full manual correctness review of every level
-[ ] Multi-language snippets — JS / Java / C++ (LanguagePicker built, needs data)
-```
-
-## `>` VALIDATION
-
-A lightweight preliminary validator lives in [`scripts/`](scripts/):
-
-```bash
-> node scripts/cc_extract.mjs | python scripts/cc_validate.py
-```
-
-It checks every level for structural integrity (placeholder ↔ blank
-alignment, no gaps/dupes, non-empty answers, unique IDs) and reconstructs
-each snippet to confirm it parses — Python via `ast.parse`, Java/C++ via a
-bracket-balance smell test. It does **not** assert algorithmic correctness.
-
----
-
-```text
-CODECLOZE // ALL SYSTEMS OPERATIONAL █
-```
+- `data.js` — all problem content (descriptions, test cases, reference solutions, hints, coaching)
+- `engine.js` — daily problem selection (date-seeded, deterministic), localStorage progress/streak, grading orchestration
+- `worker.js` — sandboxed JS execution
+- `app.js` / `index.html` / `styles.css` — UI
