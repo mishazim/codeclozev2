@@ -37,6 +37,19 @@ static void check_str(const char* label, const char* actual, const char* expecte
     if (strcmp(actual, expected) == 0) pass_++;
     else { fail_++; printf("FAIL %s\n  expected: %s\n  actual:   %s\n", label, expected, actual); }
 }
+static void check_double_arr(const char* label, const double* actual, int alen, const double* expected, int elen) {
+    int ok = (alen == elen);
+    if (ok) for (int i = 0; i < alen; i++) if (actual[i] != expected[i]) { ok = 0; break; }
+    if (ok) pass_++;
+    else {
+        fail_++;
+        printf("FAIL %s\n  expected: [", label);
+        for (int i = 0; i < elen; i++) printf("%g%s", expected[i], i + 1 < elen ? "," : "");
+        printf("]\n  actual:   [");
+        for (int i = 0; i < alen; i++) printf("%g%s", actual[i], i + 1 < alen ? "," : "");
+        printf("]\n");
+    }
+}
 
 /* =====================================================================
  * 1. TWO SUM -- optimal: hash map, O(n)/O(n)
@@ -429,6 +442,101 @@ int trieStartsWith(TrieOptimal* t, const char* prefix) {
     return 1;
 }
 
+/* =====================================================================
+ * 17. HEAPSORT -- optimal: in-place binary heap, O(n log n)/O(1)
+ * ===================================================================== */
+void heapify(int* a, int size, int i) {
+    int largest = i, l = 2 * i + 1, r = 2 * i + 2;
+    if (l < size && a[l] > a[largest]) largest = l;
+    if (r < size && a[r] > a[largest]) largest = r;
+    if (largest != i) {
+        int t = a[i]; a[i] = a[largest]; a[largest] = t;
+        heapify(a, size, largest);
+    }
+}
+void heapSort(int* arr, int n) {
+    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
+    for (int i = n - 1; i > 0; i--) {
+        int t = arr[0]; arr[0] = arr[i]; arr[i] = t;
+        heapify(arr, i, 0);
+    }
+}
+
+/* =====================================================================
+ * 18. INSERTION SORT -- optimal: adaptive shift, O(n^2) worst/O(n) best
+ * ===================================================================== */
+void insertionSort(int* arr, int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) { arr[j + 1] = arr[j]; j--; }
+        arr[j + 1] = key;
+    }
+}
+
+/* =====================================================================
+ * 19. COUNTING SORT -- optimal: O(n+k)/O(n+k)
+ * ===================================================================== */
+void countingSort(int* arr, int n) {
+    if (n == 0) return;
+    int max = arr[0];
+    for (int i = 1; i < n; i++) if (arr[i] > max) max = arr[i];
+    int* counts = calloc(max + 1, sizeof(int));
+    for (int i = 0; i < n; i++) counts[arr[i]]++;
+    int idx = 0;
+    for (int v = 0; v <= max; v++) for (int c = 0; c < counts[v]; c++) arr[idx++] = v;
+    free(counts);
+}
+
+/* =====================================================================
+ * 20. RADIX SORT -- optimal: LSD digit-by-digit, O(d*(n+k))
+ * ===================================================================== */
+void radixSort(int* arr, int n) {
+    if (n == 0) return;
+    int max = arr[0];
+    for (int i = 1; i < n; i++) if (arr[i] > max) max = arr[i];
+    int* output = malloc(sizeof(int) * n);
+    for (int exp = 1; max / exp > 0; exp *= 10) {
+        int counts[10] = {0};
+        for (int i = 0; i < n; i++) counts[(arr[i] / exp) % 10]++;
+        for (int i = 1; i < 10; i++) counts[i] += counts[i - 1];
+        for (int i = n - 1; i >= 0; i--) {
+            int digit = (arr[i] / exp) % 10;
+            output[--counts[digit]] = arr[i];
+        }
+        for (int i = 0; i < n; i++) arr[i] = output[i];
+    }
+    free(output);
+}
+
+/* =====================================================================
+ * 21. BUCKET SORT -- optimal: distribute + per-bucket sort, O(n+k) average
+ * ===================================================================== */
+int cmpDouble(const void* a, const void* b) {
+    double da = *(const double*)a, db = *(const double*)b;
+    return (da > db) - (da < db);
+}
+void bucketSort(double* arr, int n) {
+    if (n == 0) return;
+    double** buckets = malloc(sizeof(double*) * n);
+    int* counts = calloc(n, sizeof(int));
+    int* capacities = malloc(sizeof(int) * n);
+    for (int i = 0; i < n; i++) { capacities[i] = 4; buckets[i] = malloc(sizeof(double) * capacities[i]); }
+    for (int i = 0; i < n; i++) {
+        int idx = (int)(arr[i] * n);
+        if (idx >= n) idx = n - 1;
+        if (counts[idx] == capacities[idx]) { capacities[idx] *= 2; buckets[idx] = realloc(buckets[idx], sizeof(double) * capacities[idx]); }
+        buckets[idx][counts[idx]++] = arr[i];
+    }
+    int pos = 0;
+    for (int i = 0; i < n; i++) {
+        qsort(buckets[i], counts[i], sizeof(double), cmpDouble);
+        for (int j = 0; j < counts[i]; j++) arr[pos++] = buckets[i][j];
+        free(buckets[i]);
+    }
+    free(buckets); free(counts); free(capacities);
+}
+
 int main(void) {
     /* 1. Two Sum */
     {
@@ -634,6 +742,52 @@ int main(void) {
         check_int("TrieOptimal-startswith-app", trieStartsWith(&t, "app"), 1);
         trieInsert(&t, "app");
         check_int("TrieOptimal-search-app2", trieSearch(&t, "app"), 1);
+    }
+
+    /* 17+18. Heapsort / Insertion Sort (share sort cases) */
+    {
+        int a1[] = {5, 3, 8, 1, 9, 2}; int e1[] = {1, 2, 3, 5, 8, 9};
+        int a1i[] = {5, 3, 8, 1, 9, 2};
+        heapSort(a1, 6); check_int_arr("heapSort", a1, 6, e1, 6);
+        insertionSort(a1i, 6); check_int_arr("insertionSort", a1i, 6, e1, 6);
+
+        int a2[] = {2, 2, 1, 1}; int e2[] = {1, 1, 2, 2};
+        int a2i[] = {2, 2, 1, 1};
+        heapSort(a2, 4); check_int_arr("heapSort", a2, 4, e2, 4);
+        insertionSort(a2i, 4); check_int_arr("insertionSort", a2i, 4, e2, 4);
+
+        int a3[] = {5, 4, 3, 2, 1}; int e3[] = {1, 2, 3, 4, 5};
+        int a3i[] = {5, 4, 3, 2, 1};
+        heapSort(a3, 5); check_int_arr("heapSort", a3, 5, e3, 5);
+        insertionSort(a3i, 5); check_int_arr("insertionSort", a3i, 5, e3, 5);
+    }
+    /* 19. Counting Sort */
+    {
+        int a1[] = {4, 2, 2, 8, 3, 3, 1}; int e1[] = {1, 2, 2, 3, 3, 4, 8};
+        countingSort(a1, 7); check_int_arr("countingSort", a1, 7, e1, 7);
+
+        int a2[] = {0, 0, 3, 1, 2}; int e2[] = {0, 0, 1, 2, 3};
+        countingSort(a2, 5); check_int_arr("countingSort", a2, 5, e2, 5);
+    }
+    /* 20. Radix Sort */
+    {
+        int a1[] = {170, 45, 75, 90, 802, 24, 2, 66}; int e1[] = {2, 24, 45, 66, 75, 90, 170, 802};
+        radixSort(a1, 8); check_int_arr("radixSort", a1, 8, e1, 8);
+
+        int a2[] = {100, 10, 1}; int e2[] = {1, 10, 100};
+        radixSort(a2, 3); check_int_arr("radixSort", a2, 3, e2, 3);
+
+        int a3[] = {0, 0, 0}; int e3[] = {0, 0, 0};
+        radixSort(a3, 3); check_int_arr("radixSort", a3, 3, e3, 3);
+    }
+    /* 21. Bucket Sort */
+    {
+        double a1[] = {0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68};
+        double e1[] = {0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94};
+        bucketSort(a1, 10); check_double_arr("bucketSort", a1, 10, e1, 10);
+
+        double a2[] = {0.9, 0.9, 0.1}; double e2[] = {0.1, 0.9, 0.9};
+        bucketSort(a2, 3); check_double_arr("bucketSort", a2, 3, e2, 3);
     }
 
     printf("\n%d passed, %d failed\n", pass_, fail_);

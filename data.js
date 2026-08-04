@@ -1170,6 +1170,361 @@ const PROBLEMS = [
       'Forgetting the end-of-word marker, which makes `search("app")` incorrectly return true just because "apple" shares that prefix',
     ],
   },
+
+  // ===================================================================
+  // 17. HEAPSORT
+  // ===================================================================
+  {
+    id: 'heap-sort',
+    name: 'Heapsort',
+    category: 'algorithms',
+    difficulty: 'medium',
+    description: 'Sort an array of integers in ascending order and return the sorted array, using an in-place binary heap.',
+    constraints: ['0 <= arr.length <= 10^4'],
+    examples: [{ input: 'arr = [5,3,8,1,9,2]', output: '[1,2,3,5,8,9]' }],
+    io: { kind: 'function', name: 'heapSort' },
+    testCases: [
+      { args: [[5, 3, 8, 1, 9, 2]], expected: [1, 2, 3, 5, 8, 9] },
+      { args: [[]], expected: [] },
+      { args: [[1]], expected: [1] },
+      { args: [[2, 2, 1, 1]], expected: [1, 1, 2, 2] },
+      { args: [[5, 4, 3, 2, 1]], expected: [1, 2, 3, 4, 5] },
+    ],
+    languages: {
+      javascript: { starter: 'function heapSort(arr) {\n  \n}', requiredOptimal: [], requiredNaive: [] },
+      python: {
+        starter: 'def heap_sort(arr):\n    pass',
+        requiredOptimal: [/heapify/, /largest/],
+        requiredNaive: [/min_idx|min_index/, /for .+ in range\(i\s*\+\s*1/],
+      },
+      java: {
+        starter: 'static int[] heapSort(int[] arr) {\n    \n}',
+        requiredOptimal: [/heapify/i, /largest/i],
+      },
+      c: {
+        starter: 'void heapSort(int* arr, int n) {\n    \n}',
+        requiredOptimal: [/heapify/i, /largest/i],
+      },
+      cpp: {
+        starter: 'vector<int> heapSort(vector<int> arr) {\n    \n}',
+        requiredOptimal: [/heapify/i, /largest/i],
+      },
+    },
+    optimal: {
+      time: 'O(n log n)', space: 'O(1)',
+      explanation: 'Build a max-heap in place — O(n) — then repeatedly swap the root (the largest remaining element) to the end of the unsorted region and sift it back down. Building the heap is O(n); the n extractions that follow each cost O(log n) to re-sift, giving O(n log n) overall with no extra array, unlike merge sort.',
+      code: {
+        javascript: `function heapSort(arr) {\n  const a = arr.slice()\n  const n = a.length\n  function heapify(size, i) {\n    let largest = i\n    const l = 2 * i + 1, r = 2 * i + 2\n    if (l < size && a[l] > a[largest]) largest = l\n    if (r < size && a[r] > a[largest]) largest = r\n    if (largest !== i) {\n      [a[i], a[largest]] = [a[largest], a[i]]\n      heapify(size, largest)\n    }\n  }\n  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(n, i)\n  for (let i = n - 1; i > 0; i--) {\n    [a[0], a[i]] = [a[i], a[0]]\n    heapify(i, 0)\n  }\n  return a\n}`,
+        python: `def heap_sort(arr):\n    a = arr[:]\n    n = len(a)\n    def heapify(size, i):\n        largest = i\n        l, r = 2 * i + 1, 2 * i + 2\n        if l < size and a[l] > a[largest]:\n            largest = l\n        if r < size and a[r] > a[largest]:\n            largest = r\n        if largest != i:\n            a[i], a[largest] = a[largest], a[i]\n            heapify(size, largest)\n    for i in range(n // 2 - 1, -1, -1):\n        heapify(n, i)\n    for i in range(n - 1, 0, -1):\n        a[0], a[i] = a[i], a[0]\n        heapify(i, 0)\n    return a`,
+        java: `static int[] heapSort(int[] arr) {\n    int[] a = arr.clone();\n    int n = a.length;\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(a, n, i);\n    for (int i = n - 1; i > 0; i--) {\n        int t = a[0]; a[0] = a[i]; a[i] = t;\n        heapify(a, i, 0);\n    }\n    return a;\n}\nstatic void heapify(int[] a, int size, int i) {\n    int largest = i, l = 2 * i + 1, r = 2 * i + 2;\n    if (l < size && a[l] > a[largest]) largest = l;\n    if (r < size && a[r] > a[largest]) largest = r;\n    if (largest != i) {\n        int t = a[i]; a[i] = a[largest]; a[largest] = t;\n        heapify(a, size, largest);\n    }\n}`,
+        c: `void heapify(int* a, int size, int i) {\n    int largest = i, l = 2 * i + 1, r = 2 * i + 2;\n    if (l < size && a[l] > a[largest]) largest = l;\n    if (r < size && a[r] > a[largest]) largest = r;\n    if (largest != i) {\n        int t = a[i]; a[i] = a[largest]; a[largest] = t;\n        heapify(a, size, largest);\n    }\n}\nvoid heapSort(int* arr, int n) {\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);\n    for (int i = n - 1; i > 0; i--) {\n        int t = arr[0]; arr[0] = arr[i]; arr[i] = t;\n        heapify(arr, i, 0);\n    }\n}`,
+        cpp: `void heapify(vector<int>& a, int size, int i) {\n    int largest = i, l = 2 * i + 1, r = 2 * i + 2;\n    if (l < size && a[l] > a[largest]) largest = l;\n    if (r < size && a[r] > a[largest]) largest = r;\n    if (largest != i) { swap(a[i], a[largest]); heapify(a, size, largest); }\n}\nvector<int> heapSort(vector<int> arr) {\n    int n = (int)arr.size();\n    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);\n    for (int i = n - 1; i > 0; i--) { swap(arr[0], arr[i]); heapify(arr, i, 0); }\n    return arr;\n}`,
+      },
+    },
+    naive: {
+      time: 'O(n^2)', space: 'O(1)',
+      code: {
+        javascript: `function heapSort(arr) {\n  const a = arr.slice()\n  for (let i = 0; i < a.length; i++) {\n    let minIdx = i\n    for (let j = i + 1; j < a.length; j++) if (a[j] < a[minIdx]) minIdx = j;\n    [a[i], a[minIdx]] = [a[minIdx], a[i]]\n  }\n  return a\n}`,
+        python: `def heap_sort(arr):\n    a = arr[:]\n    for i in range(len(a)):\n        min_idx = i\n        for j in range(i + 1, len(a)):\n            if a[j] < a[min_idx]:\n                min_idx = j\n        a[i], a[min_idx] = a[min_idx], a[i]\n    return a`,
+      },
+    },
+    useCases: [
+      'Priority-queue-backed scheduling (OS process scheduling, event simulation) relies on the same "sift to maintain heap property" primitive heapsort is built from',
+      'Guaranteed O(n log n) worst-case with O(1) extra space makes heapsort attractive where quicksort\u2019s worst case or mergesort\u2019s O(n) buffer are unacceptable \u2014 it\u2019s the fallback introsort switches to when quicksort\u2019s recursion gets too deep',
+    ],
+    hints: [
+      'Selection sort repeatedly scans for the minimum (O(n) per step) \u2014 what data structure finds the max in O(log n) instead?',
+      'Build a max-heap from the array, then repeatedly swap the root (the max) to the end and shrink the heap by one, re-heapifying whatever remains.',
+    ],
+    commonMistakes: [
+      'Falling back to selection sort\u2019s linear scan for the max instead of maintaining the heap invariant, which loses the O(log n) advantage entirely',
+      'Forgetting to re-heapify (sift down) after swapping the root to the end, leaving the remaining heap invalid for the next extraction',
+    ],
+  },
+
+  // ===================================================================
+  // 18. INSERTION SORT
+  // ===================================================================
+  {
+    id: 'insertion-sort',
+    name: 'Insertion Sort',
+    category: 'algorithms',
+    difficulty: 'easy',
+    description: 'Sort an array of integers in ascending order and return the sorted array, by growing a sorted prefix one element at a time.',
+    constraints: ['0 <= arr.length <= 10^4'],
+    examples: [{ input: 'arr = [5,3,8,1,9,2]', output: '[1,2,3,5,8,9]' }],
+    io: { kind: 'function', name: 'insertionSort' },
+    testCases: [
+      { args: [[5, 3, 8, 1, 9, 2]], expected: [1, 2, 3, 5, 8, 9] },
+      { args: [[]], expected: [] },
+      { args: [[1]], expected: [1] },
+      { args: [[2, 2, 1, 1]], expected: [1, 1, 2, 2] },
+      { args: [[5, 4, 3, 2, 1]], expected: [1, 2, 3, 4, 5] },
+    ],
+    languages: {
+      javascript: { starter: 'function insertionSort(arr) {\n  \n}', requiredOptimal: [], requiredNaive: [] },
+      python: {
+        starter: 'def insertion_sort(arr):\n    pass',
+        requiredOptimal: [/key\s*=\s*a\[/, /while .+ > key|while .+ > \w+\[i\]/],
+        requiredNaive: [/range\(/, /j\s*\+\s*1\]/],
+      },
+      java: {
+        starter: 'static int[] insertionSort(int[] arr) {\n    \n}',
+        requiredOptimal: [/int\s+key/i, /while\s*\(/],
+      },
+      c: {
+        starter: 'void insertionSort(int* arr, int n) {\n    \n}',
+        requiredOptimal: [/key/i, /while\s*\(/],
+      },
+      cpp: {
+        starter: 'vector<int> insertionSort(vector<int> arr) {\n    \n}',
+        requiredOptimal: [/key/i, /while\s*\(/],
+      },
+    },
+    optimal: {
+      time: 'O(n^2) worst, O(n) best (nearly sorted)', space: 'O(1)',
+      explanation: 'Grow a sorted prefix one element at a time: take the next unsorted element and shift it leftward past every already-sorted element bigger than it. On nearly-sorted input each element only shifts a few places, so the algorithm is adaptive \u2014 O(n) best case (already sorted) versus O(n^2) worst case (reverse sorted) \u2014 a property plain bubble sort lacks without an explicit early-exit check.',
+      code: {
+        javascript: `function insertionSort(arr) {\n  const a = arr.slice()\n  for (let i = 1; i < a.length; i++) {\n    const key = a[i]\n    let j = i - 1\n    while (j >= 0 && a[j] > key) { a[j + 1] = a[j]; j-- }\n    a[j + 1] = key\n  }\n  return a\n}`,
+        python: `def insertion_sort(arr):\n    a = arr[:]\n    for i in range(1, len(a)):\n        key = a[i]\n        j = i - 1\n        while j >= 0 and a[j] > key:\n            a[j + 1] = a[j]\n            j -= 1\n        a[j + 1] = key\n    return a`,
+        java: `static int[] insertionSort(int[] arr) {\n    int[] a = arr.clone();\n    for (int i = 1; i < a.length; i++) {\n        int key = a[i];\n        int j = i - 1;\n        while (j >= 0 && a[j] > key) { a[j + 1] = a[j]; j--; }\n        a[j + 1] = key;\n    }\n    return a;\n}`,
+        c: `void insertionSort(int* arr, int n) {\n    for (int i = 1; i < n; i++) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) { arr[j + 1] = arr[j]; j--; }\n        arr[j + 1] = key;\n    }\n}`,
+        cpp: `vector<int> insertionSort(vector<int> arr) {\n    for (int i = 1; i < (int)arr.size(); i++) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) { arr[j + 1] = arr[j]; j--; }\n        arr[j + 1] = key;\n    }\n    return arr;\n}`,
+      },
+    },
+    naive: {
+      time: 'O(n^2)', space: 'O(1)',
+      code: {
+        javascript: `function insertionSort(arr) {\n  const a = arr.slice()\n  for (let i = 0; i < a.length; i++) {\n    for (let j = 0; j < a.length - i - 1; j++) {\n      if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]] }\n    }\n  }\n  return a\n}`,
+        python: `def insertion_sort(arr):\n    a = arr[:]\n    n = len(a)\n    for i in range(n):\n        for j in range(n - i - 1):\n            if a[j] > a[j + 1]:\n                a[j], a[j + 1] = a[j + 1], a[j]\n    return a`,
+      },
+    },
+    useCases: [
+      'Sorting small arrays or nearly-sorted data (e.g. inserting a few new records into an already-sorted list) \u2014 production sorts like Timsort (Python) and Java\u2019s primitive-array sort fall back to insertion sort for small subarrays because its low overhead beats O(n log n) algorithms below a size threshold',
+      'Online sorting where elements arrive one at a time and the collection must stay sorted after each arrival, e.g. a live leaderboard',
+    ],
+    hints: [
+      'Bubble sort repeatedly sweeps and swaps adjacent out-of-order pairs across the whole array on every pass, even once most of it is already sorted.',
+      'Instead, grow a sorted region from the left: take each new element and shift it leftward only as far as it needs to go \u2014 already-sorted, in-order neighbors stay untouched.',
+    ],
+    commonMistakes: [
+      'Using a bubble-sort-style full sweep every pass instead of directly shifting the current element into its place',
+      'Scanning the entire sorted prefix on every insertion instead of using a `while` loop that stops as soon as `a[j] <= key`, which throws away the adaptive O(n) best case',
+    ],
+  },
+
+  // ===================================================================
+  // 19. COUNTING SORT
+  // ===================================================================
+  {
+    id: 'counting-sort',
+    name: 'Counting Sort',
+    category: 'algorithms',
+    difficulty: 'medium',
+    description: 'Sort an array of non-negative integers in ascending order and return the sorted array. Every value is bounded (0 to max(arr)) \u2014 exploit that known range instead of comparing elements.',
+    constraints: ['0 <= arr.length <= 10^4', '0 <= arr[i] <= 1000'],
+    examples: [{ input: 'arr = [4,2,2,8,3,3,1]', output: '[1,2,2,3,3,4,8]' }],
+    io: { kind: 'function', name: 'countingSort' },
+    testCases: [
+      { args: [[4, 2, 2, 8, 3, 3, 1]], expected: [1, 2, 2, 3, 3, 4, 8] },
+      { args: [[]], expected: [] },
+      { args: [[1]], expected: [1] },
+      { args: [[5, 5, 5]], expected: [5, 5, 5] },
+      { args: [[0, 0, 3, 1, 2]], expected: [0, 0, 1, 2, 3] },
+    ],
+    languages: {
+      javascript: { starter: 'function countingSort(arr) {\n  \n}', requiredOptimal: [], requiredNaive: [] },
+      python: {
+        starter: 'def counting_sort(arr):\n    pass',
+        requiredOptimal: [/count/i, /max\(/],
+        requiredNaive: [/range\(/, /j\s*\+\s*1\]/],
+      },
+      java: {
+        starter: 'static int[] countingSort(int[] arr) {\n    \n}',
+        requiredOptimal: [/count/i, /math\.max|max\(/i],
+      },
+      c: {
+        starter: 'void countingSort(int* arr, int n) {\n    \n}',
+        requiredOptimal: [/count/i, /max/i],
+      },
+      cpp: {
+        starter: 'vector<int> countingSort(vector<int> arr) {\n    \n}',
+        requiredOptimal: [/count/i, /max_element|max\(/i],
+      },
+    },
+    optimal: {
+      time: 'O(n + k)', space: 'O(n + k)',
+      explanation: 'A comparison sort can never beat O(n log n) in the worst case \u2014 but bounded integers don\u2019t need comparisons at all. Count how many times each value 0..max appears, then walk the count array from 0 upward, emitting each value as many times as it was counted. No comparisons between elements ever happen, so the O(n log n) lower bound for comparison sorts simply doesn\u2019t apply.',
+      code: {
+        javascript: `function countingSort(arr) {\n  if (arr.length === 0) return []\n  const max = Math.max(...arr)\n  const counts = new Array(max + 1).fill(0)\n  for (const n of arr) counts[n]++\n  const result = []\n  for (let v = 0; v <= max; v++) {\n    for (let c = 0; c < counts[v]; c++) result.push(v)\n  }\n  return result\n}`,
+        python: `def counting_sort(arr):\n    if not arr:\n        return []\n    m = max(arr)\n    counts = [0] * (m + 1)\n    for n in arr:\n        counts[n] += 1\n    result = []\n    for v in range(m + 1):\n        result.extend([v] * counts[v])\n    return result`,
+        java: `static int[] countingSort(int[] arr) {\n    if (arr.length == 0) return new int[]{};\n    int max = arr[0];\n    for (int n : arr) max = Math.max(max, n);\n    int[] counts = new int[max + 1];\n    for (int n : arr) counts[n]++;\n    int[] result = new int[arr.length];\n    int idx = 0;\n    for (int v = 0; v <= max; v++) {\n        for (int c = 0; c < counts[v]; c++) result[idx++] = v;\n    }\n    return result;\n}`,
+        c: `void countingSort(int* arr, int n) {\n    if (n == 0) return;\n    int max = arr[0];\n    for (int i = 1; i < n; i++) if (arr[i] > max) max = arr[i];\n    int* counts = calloc(max + 1, sizeof(int));\n    for (int i = 0; i < n; i++) counts[arr[i]]++;\n    int idx = 0;\n    for (int v = 0; v <= max; v++) for (int c = 0; c < counts[v]; c++) arr[idx++] = v;\n    free(counts);\n}`,
+        cpp: `vector<int> countingSort(vector<int> arr) {\n    if (arr.empty()) return {};\n    int mx = *max_element(arr.begin(), arr.end());\n    vector<int> counts(mx + 1, 0);\n    for (int n : arr) counts[n]++;\n    vector<int> result;\n    for (int v = 0; v <= mx; v++) for (int c = 0; c < counts[v]; c++) result.push_back(v);\n    return result;\n}`,
+      },
+    },
+    naive: {
+      time: 'O(n^2)', space: 'O(1)',
+      code: {
+        javascript: `function countingSort(arr) {\n  const a = arr.slice()\n  for (let i = 0; i < a.length; i++) {\n    for (let j = 0; j < a.length - i - 1; j++) {\n      if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]] }\n    }\n  }\n  return a\n}`,
+        python: `def counting_sort(arr):\n    a = arr[:]\n    n = len(a)\n    for i in range(n):\n        for j in range(n - i - 1):\n            if a[j] > a[j + 1]:\n                a[j], a[j + 1] = a[j + 1], a[j]\n    return a`,
+      },
+    },
+    useCases: [
+      'Sorting by a small number of bounded integer categories \u2014 exam scores 0-100, age brackets, histogram bucketing \u2014 genuinely faster than any comparison sort when the value range k is O(n)',
+      'The per-digit stabilizing subroutine inside radix sort, which counting-sorts by each digit in turn',
+    ],
+    hints: [
+      'A comparison sort can\u2019t beat O(n log n) in the worst case \u2014 but you\u2019re told every value is a bounded non-negative integer. What if, instead of comparing elements, you counted how many times each value appears?',
+      'Build a count array indexed by value, then walk it from 0 upward, emitting each value as many times as it was counted.',
+    ],
+    commonMistakes: [
+      'Falling back to a comparison sort (even an O(n log n) one) when the bounded-integer-range hint is exactly what makes O(n+k) counting sort possible',
+      'Sizing the count array too small \u2014 it must be max(arr)+1, or the largest value causes an index-out-of-bounds',
+    ],
+  },
+
+  // ===================================================================
+  // 20. RADIX SORT
+  // ===================================================================
+  {
+    id: 'radix-sort',
+    name: 'Radix Sort',
+    category: 'algorithms',
+    difficulty: 'hard',
+    description: 'Sort an array of non-negative integers in ascending order and return the sorted array, without ever comparing two elements directly \u2014 process one decimal digit at a time.',
+    constraints: ['0 <= arr.length <= 10^4', '0 <= arr[i] <= 10^9'],
+    examples: [{ input: 'arr = [170,45,75,90,802,24,2,66]', output: '[2,24,45,66,75,90,170,802]' }],
+    io: { kind: 'function', name: 'radixSort' },
+    testCases: [
+      { args: [[170, 45, 75, 90, 802, 24, 2, 66]], expected: [2, 24, 45, 66, 75, 90, 170, 802] },
+      { args: [[]], expected: [] },
+      { args: [[5]], expected: [5] },
+      { args: [[100, 10, 1]], expected: [1, 10, 100] },
+      { args: [[0, 0, 0]], expected: [0, 0, 0] },
+    ],
+    languages: {
+      javascript: { starter: 'function radixSort(arr) {\n  \n}', requiredOptimal: [], requiredNaive: [] },
+      python: {
+        starter: 'def radix_sort(arr):\n    pass',
+        requiredOptimal: [/exp/, /%\s*10/],
+        requiredNaive: [/key\s*=\s*a\[/, /while .+ > key|while .+ > \w+\[i\]/],
+      },
+      java: {
+        starter: 'static int[] radixSort(int[] arr) {\n    \n}',
+        requiredOptimal: [/exp/i, /%\s*10/],
+      },
+      c: {
+        starter: 'void radixSort(int* arr, int n) {\n    \n}',
+        requiredOptimal: [/exp/i, /%\s*10/],
+      },
+      cpp: {
+        starter: 'vector<int> radixSort(vector<int> arr) {\n    \n}',
+        requiredOptimal: [/exp/i, /%\s*10/],
+      },
+    },
+    optimal: {
+      time: 'O(d * (n + k))', space: 'O(n + k)',
+      explanation: 'Counting sort works great when values are small, but real integers can be huge. Radix sort applies a stable counting sort digit-by-digit instead of on the whole value: starting from the least-significant digit, bucket the array by that digit (0-9), then repeat for the next digit. After processing every digit up to the largest number\u2019s digit count (d digits, base k=10), the array is fully sorted \u2014 each pass must be stable so earlier (less-significant) digit ordering is preserved.',
+      code: {
+        javascript: `function radixSort(arr) {\n  if (arr.length === 0) return []\n  let result = arr.slice()\n  const max = Math.max(...result)\n  for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {\n    const counts = new Array(10).fill(0)\n    for (const n of result) counts[Math.floor(n / exp) % 10]++\n    for (let i = 1; i < 10; i++) counts[i] += counts[i - 1]\n    const output = new Array(result.length)\n    for (let i = result.length - 1; i >= 0; i--) {\n      const digit = Math.floor(result[i] / exp) % 10\n      output[--counts[digit]] = result[i]\n    }\n    result = output\n  }\n  return result\n}`,
+        python: `def radix_sort(arr):\n    if not arr:\n        return []\n    result = arr[:]\n    m = max(result)\n    exp = 1\n    while m // exp > 0:\n        counts = [0] * 10\n        for n in result:\n            counts[(n // exp) % 10] += 1\n        for i in range(1, 10):\n            counts[i] += counts[i - 1]\n        output = [0] * len(result)\n        for i in range(len(result) - 1, -1, -1):\n            digit = (result[i] // exp) % 10\n            counts[digit] -= 1\n            output[counts[digit]] = result[i]\n        result = output\n        exp *= 10\n    return result`,
+        java: `static int[] radixSort(int[] arr) {\n    if (arr.length == 0) return new int[]{};\n    int[] result = arr.clone();\n    int max = result[0];\n    for (int n : result) max = Math.max(max, n);\n    for (int exp = 1; max / exp > 0; exp *= 10) {\n        int[] counts = new int[10];\n        for (int n : result) counts[(n / exp) % 10]++;\n        for (int i = 1; i < 10; i++) counts[i] += counts[i - 1];\n        int[] output = new int[result.length];\n        for (int i = result.length - 1; i >= 0; i--) {\n            int digit = (result[i] / exp) % 10;\n            output[--counts[digit]] = result[i];\n        }\n        result = output;\n    }\n    return result;\n}`,
+        c: `void radixSort(int* arr, int n) {\n    if (n == 0) return;\n    int max = arr[0];\n    for (int i = 1; i < n; i++) if (arr[i] > max) max = arr[i];\n    int* output = malloc(sizeof(int) * n);\n    for (int exp = 1; max / exp > 0; exp *= 10) {\n        int counts[10] = {0};\n        for (int i = 0; i < n; i++) counts[(arr[i] / exp) % 10]++;\n        for (int i = 1; i < 10; i++) counts[i] += counts[i - 1];\n        for (int i = n - 1; i >= 0; i--) {\n            int digit = (arr[i] / exp) % 10;\n            output[--counts[digit]] = arr[i];\n        }\n        for (int i = 0; i < n; i++) arr[i] = output[i];\n    }\n    free(output);\n}`,
+        cpp: `vector<int> radixSort(vector<int> arr) {\n    if (arr.empty()) return {};\n    int mx = *max_element(arr.begin(), arr.end());\n    for (int exp = 1; mx / exp > 0; exp *= 10) {\n        vector<int> counts(10, 0);\n        for (int n : arr) counts[(n / exp) % 10]++;\n        for (int i = 1; i < 10; i++) counts[i] += counts[i - 1];\n        vector<int> output(arr.size());\n        for (int i = (int)arr.size() - 1; i >= 0; i--) {\n            int digit = (arr[i] / exp) % 10;\n            output[--counts[digit]] = arr[i];\n        }\n        arr = output;\n    }\n    return arr;\n}`,
+      },
+    },
+    naive: {
+      time: 'O(n^2)', space: 'O(1)',
+      code: {
+        javascript: `function radixSort(arr) {\n  const a = arr.slice()\n  for (let i = 1; i < a.length; i++) {\n    const key = a[i]\n    let j = i - 1\n    while (j >= 0 && a[j] > key) { a[j + 1] = a[j]; j-- }\n    a[j + 1] = key\n  }\n  return a\n}`,
+        python: `def radix_sort(arr):\n    a = arr[:]\n    for i in range(1, len(a)):\n        key = a[i]\n        j = i - 1\n        while j >= 0 and a[j] > key:\n            a[j + 1] = a[j]\n            j -= 1\n        a[j + 1] = key\n    return a`,
+      },
+    },
+    useCases: [
+      'Sorting fixed-width keys where comparison is wasteful \u2014 IP addresses, phone numbers, fixed-length suffixes in suffix array construction \u2014 and the original inspiration for the algorithm: card-sorting machines sorting punch cards column by column',
+      'Any pipeline where counting sort\u2019s O(n+k) is too memory-hungry because k is huge (e.g. 32-bit integers) \u2014 radix sort gets the same comparison-lower-bound-beating benefit via O(d) small passes instead of one pass over a huge range',
+    ],
+    hints: [
+      'Counting sort works great when values are small \u2014 what about large numbers with too many possible values for a count array to be practical?',
+      'Apply counting sort one decimal digit at a time, starting from the least-significant digit. As long as each pass is stable, sorting by every digit in turn (up to the longest number\u2019s digit count) leaves the whole array sorted.',
+    ],
+    commonMistakes: [
+      'Using an unstable per-digit sort \u2014 radix sort only works if each digit pass preserves the relative order established by previous, less-significant digit passes',
+      'Stopping after the first digit of the longest number instead of continuing the loop until `max / exp` reaches 0',
+    ],
+  },
+
+  // ===================================================================
+  // 21. BUCKET SORT
+  // ===================================================================
+  {
+    id: 'bucket-sort',
+    name: 'Bucket Sort',
+    category: 'algorithms',
+    difficulty: 'medium',
+    description: 'Sort an array of floating-point numbers in the range [0, 1) in ascending order and return the sorted array, by distributing elements into buckets.',
+    constraints: ['0 <= arr.length <= 10^4', '0 <= arr[i] < 1'],
+    examples: [{ input: 'arr = [0.78,0.17,0.39,0.26,0.72]', output: '[0.17,0.26,0.39,0.72,0.78]' }],
+    io: { kind: 'function', name: 'bucketSort' },
+    testCases: [
+      { args: [[0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68]], expected: [0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94] },
+      { args: [[]], expected: [] },
+      { args: [[0.5]], expected: [0.5] },
+      { args: [[0.9, 0.9, 0.1]], expected: [0.1, 0.9, 0.9] },
+      { args: [[0.1, 0.2, 0.3]], expected: [0.1, 0.2, 0.3] },
+    ],
+    languages: {
+      javascript: { starter: 'function bucketSort(arr) {\n  \n}', requiredOptimal: [], requiredNaive: [] },
+      python: {
+        starter: 'def bucket_sort(arr):\n    pass',
+        requiredOptimal: [/bucket/i, /\*\s*n\)|int\(.*\*\s*n/],
+        requiredNaive: [/key\s*=\s*a\[/, /while .+ > key|while .+ > \w+\[i\]/],
+      },
+      java: {
+        starter: 'static double[] bucketSort(double[] arr) {\n    \n}',
+        requiredOptimal: [/bucket/i, /\*\s*n\)/],
+      },
+      c: {
+        starter: 'void bucketSort(double* arr, int n) {\n    \n}',
+        requiredOptimal: [/bucket/i, /\*\s*n\)/],
+      },
+      cpp: {
+        starter: 'vector<double> bucketSort(vector<double> arr) {\n    \n}',
+        requiredOptimal: [/bucket/i, /\*\s*n\)/],
+      },
+    },
+    optimal: {
+      time: 'O(n + k) average, O(n^2) worst case', space: 'O(n + k)',
+      explanation: 'Distribute values uniformly across n buckets by magnitude (idx = floor(value * n) for values in [0,1)), sort each small bucket individually (insertion sort suits buckets well since they hold O(1) elements on uniformly distributed input), then concatenate. With a uniform distribution the buckets stay small and the whole sort averages O(n + k); a pathological input that crams every value into one bucket degrades to whatever the per-bucket sort costs.',
+      code: {
+        javascript: `function insertionSortBucket(bucket) {\n  for (let i = 1; i < bucket.length; i++) {\n    const key = bucket[i]\n    let j = i - 1\n    while (j >= 0 && bucket[j] > key) { bucket[j + 1] = bucket[j]; j-- }\n    bucket[j + 1] = key\n  }\n}\nfunction bucketSort(arr) {\n  const n = arr.length\n  if (n === 0) return []\n  const buckets = Array.from({ length: n }, () => [])\n  for (const v of arr) {\n    let idx = Math.floor(v * n)\n    if (idx >= n) idx = n - 1\n    buckets[idx].push(v)\n  }\n  for (const bucket of buckets) insertionSortBucket(bucket)\n  const result = []\n  for (const bucket of buckets) for (const v of bucket) result.push(v)\n  return result\n}`,
+        python: `def bucket_sort(arr):\n    n = len(arr)\n    if n == 0:\n        return []\n    buckets = [[] for _ in range(n)]\n    for v in arr:\n        idx = int(v * n)\n        if idx >= n:\n            idx = n - 1\n        buckets[idx].append(v)\n    for bucket in buckets:\n        for i in range(1, len(bucket)):\n            key = bucket[i]\n            j = i - 1\n            while j >= 0 and bucket[j] > key:\n                bucket[j + 1] = bucket[j]\n                j -= 1\n            bucket[j + 1] = key\n    result = []\n    for bucket in buckets:\n        result.extend(bucket)\n    return result`,
+        java: `static double[] bucketSort(double[] arr) {\n    int n = arr.length;\n    if (n == 0) return new double[]{};\n    List<List<Double>> buckets = new ArrayList<>();\n    for (int i = 0; i < n; i++) buckets.add(new ArrayList<>());\n    for (double v : arr) {\n        int idx = (int) (v * n);\n        if (idx >= n) idx = n - 1;\n        buckets.get(idx).add(v);\n    }\n    for (List<Double> bucket : buckets) {\n        for (int i = 1; i < bucket.size(); i++) {\n            double key = bucket.get(i);\n            int j = i - 1;\n            while (j >= 0 && bucket.get(j) > key) {\n                bucket.set(j + 1, bucket.get(j));\n                j--;\n            }\n            bucket.set(j + 1, key);\n        }\n    }\n    double[] result = new double[n];\n    int idx = 0;\n    for (List<Double> bucket : buckets) for (double v : bucket) result[idx++] = v;\n    return result;\n}`,
+        c: `int cmpDouble(const void* a, const void* b) {\n    double da = *(const double*)a, db = *(const double*)b;\n    return (da > db) - (da < db);\n}\nvoid bucketSort(double* arr, int n) {\n    if (n == 0) return;\n    double** buckets = malloc(sizeof(double*) * n);\n    int* counts = calloc(n, sizeof(int));\n    int* capacities = malloc(sizeof(int) * n);\n    for (int i = 0; i < n; i++) { capacities[i] = 4; buckets[i] = malloc(sizeof(double) * capacities[i]); }\n    for (int i = 0; i < n; i++) {\n        int idx = (int)(arr[i] * n);\n        if (idx >= n) idx = n - 1;\n        if (counts[idx] == capacities[idx]) { capacities[idx] *= 2; buckets[idx] = realloc(buckets[idx], sizeof(double) * capacities[idx]); }\n        buckets[idx][counts[idx]++] = arr[i];\n    }\n    int pos = 0;\n    for (int i = 0; i < n; i++) {\n        qsort(buckets[i], counts[i], sizeof(double), cmpDouble);\n        for (int j = 0; j < counts[i]; j++) arr[pos++] = buckets[i][j];\n        free(buckets[i]);\n    }\n    free(buckets); free(counts); free(capacities);\n}`,
+        cpp: `vector<double> bucketSort(vector<double> arr) {\n    int n = (int)arr.size();\n    if (n == 0) return {};\n    vector<vector<double>> buckets(n);\n    for (double v : arr) {\n        int idx = (int)(v * n);\n        if (idx >= n) idx = n - 1;\n        buckets[idx].push_back(v);\n    }\n    for (auto& bucket : buckets) sort(bucket.begin(), bucket.end());\n    vector<double> result;\n    for (auto& bucket : buckets) for (double v : bucket) result.push_back(v);\n    return result;\n}`,
+      },
+    },
+    naive: {
+      time: 'O(n^2)', space: 'O(1)',
+      code: {
+        javascript: `function bucketSort(arr) {\n  const a = arr.slice()\n  for (let i = 1; i < a.length; i++) {\n    const key = a[i]\n    let j = i - 1\n    while (j >= 0 && a[j] > key) { a[j + 1] = a[j]; j-- }\n    a[j + 1] = key\n  }\n  return a\n}`,
+        python: `def bucket_sort(arr):\n    a = arr[:]\n    for i in range(1, len(a)):\n        key = a[i]\n        j = i - 1\n        while j >= 0 and a[j] > key:\n            a[j + 1] = a[j]\n            j -= 1\n        a[j + 1] = key\n    return a`,
+      },
+    },
+    useCases: [
+      'Sorting data known to be uniformly distributed over a range \u2014 graphics color/depth binning, histogram-based rendering, and any "put similar-magnitude things near each other" preprocessing step',
+      'The bucketing step is the same core idea behind hash-based partitioning in distributed sort-merge (e.g. Spark/Hadoop), just generalized from numeric ranges to hash-key ranges',
+    ],
+    hints: [
+      'If values are uniformly spread across a known range like [0,1), you can guess roughly where each one belongs before doing any comparisons at all.',
+      'Scale each value by n and floor it to pick a bucket index, drop the value in that bucket, sort each (small) bucket individually, then concatenate the buckets in order.',
+    ],
+    commonMistakes: [
+      'Sorting the whole array directly (e.g. insertion/bubble sort) instead of first distributing into buckets \u2014 correct, but ignores the uniform-distribution structure the problem gives you',
+      'Forgetting to clamp the bucket index \u2014 a value at the very top of the range, or floating-point rounding, can compute idx == n, one past the last bucket',
+    ],
+  },
 ]
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { PROBLEMS }

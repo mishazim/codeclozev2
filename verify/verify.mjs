@@ -595,5 +595,161 @@ function runTrie(Impl) {
 check('TrieOptimal', runTrie(TrieOptimal), [true, false, true, true])
 check('TrieNaive', runTrie(TrieNaive), [true, false, true, true])
 
+// =====================================================================
+// 17. HEAPSORT
+// =====================================================================
+function heapSortOptimal(arr) {
+  const a = arr.slice()
+  const n = a.length
+  function heapify(size, i) {
+    let largest = i
+    const l = 2 * i + 1, r = 2 * i + 2
+    if (l < size && a[l] > a[largest]) largest = l
+    if (r < size && a[r] > a[largest]) largest = r
+    if (largest !== i) {
+      [a[i], a[largest]] = [a[largest], a[i]]
+      heapify(size, largest)
+    }
+  }
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(n, i)
+  for (let i = n - 1; i > 0; i--) {
+    [a[0], a[i]] = [a[i], a[0]]
+    heapify(i, 0)
+  }
+  return a
+}
+function selectionSortNaive(arr) {
+  const a = arr.slice()
+  for (let i = 0; i < a.length; i++) {
+    let minIdx = i
+    for (let j = i + 1; j < a.length; j++) if (a[j] < a[minIdx]) minIdx = j;
+    [a[i], a[minIdx]] = [a[minIdx], a[i]]
+  }
+  return a
+}
+for (const [args, exp] of sortCases) {
+  check('heapSortOptimal', heapSortOptimal(...args), exp)
+  check('selectionSortNaive', selectionSortNaive(...args), exp)
+}
+
+// =====================================================================
+// 18. INSERTION SORT
+// =====================================================================
+function insertionSortOptimal(arr) {
+  const a = arr.slice()
+  for (let i = 1; i < a.length; i++) {
+    const key = a[i]
+    let j = i - 1
+    while (j >= 0 && a[j] > key) { a[j + 1] = a[j]; j-- }
+    a[j + 1] = key
+  }
+  return a
+}
+function bubbleSortNaive2(arr) {
+  const a = arr.slice()
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < a.length - i - 1; j++) {
+      if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]] }
+    }
+  }
+  return a
+}
+for (const [args, exp] of sortCases) {
+  check('insertionSortOptimal', insertionSortOptimal(...args), exp)
+  check('bubbleSortNaive2', bubbleSortNaive2(...args), exp)
+}
+
+// =====================================================================
+// 19. COUNTING SORT
+// =====================================================================
+function countingSortOptimal(arr) {
+  if (arr.length === 0) return []
+  const max = Math.max(...arr)
+  const counts = new Array(max + 1).fill(0)
+  for (const n of arr) counts[n]++
+  const result = []
+  for (let v = 0; v <= max; v++) {
+    for (let c = 0; c < counts[v]; c++) result.push(v)
+  }
+  return result
+}
+const countingSortCases = [
+  [[[4, 2, 2, 8, 3, 3, 1]], [1, 2, 2, 3, 3, 4, 8]],
+  [[[]], []],
+  [[[1]], [1]],
+  [[[5, 5, 5]], [5, 5, 5]],
+  [[[0, 0, 3, 1, 2]], [0, 0, 1, 2, 3]],
+]
+for (const [args, exp] of countingSortCases) {
+  check('countingSortOptimal', countingSortOptimal(...args), exp)
+}
+
+// =====================================================================
+// 20. RADIX SORT
+// =====================================================================
+function radixSortOptimal(arr) {
+  if (arr.length === 0) return []
+  let result = arr.slice()
+  const max = Math.max(...result)
+  for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
+    const counts = new Array(10).fill(0)
+    for (const n of result) counts[Math.floor(n / exp) % 10]++
+    for (let i = 1; i < 10; i++) counts[i] += counts[i - 1]
+    const output = new Array(result.length)
+    for (let i = result.length - 1; i >= 0; i--) {
+      const digit = Math.floor(result[i] / exp) % 10
+      output[--counts[digit]] = result[i]
+    }
+    result = output
+  }
+  return result
+}
+const radixSortCases = [
+  [[[170, 45, 75, 90, 802, 24, 2, 66]], [2, 24, 45, 66, 75, 90, 170, 802]],
+  [[[]], []],
+  [[[5]], [5]],
+  [[[100, 10, 1]], [1, 10, 100]],
+  [[[0, 0, 0]], [0, 0, 0]],
+]
+for (const [args, exp] of radixSortCases) {
+  check('radixSortOptimal', radixSortOptimal(...args), exp)
+}
+
+// =====================================================================
+// 21. BUCKET SORT
+// =====================================================================
+function insertionSortBucket(bucket) {
+  for (let i = 1; i < bucket.length; i++) {
+    const key = bucket[i]
+    let j = i - 1
+    while (j >= 0 && bucket[j] > key) { bucket[j + 1] = bucket[j]; j-- }
+    bucket[j + 1] = key
+  }
+}
+function bucketSortOptimal(arr) {
+  const n = arr.length
+  if (n === 0) return []
+  const buckets = Array.from({ length: n }, () => [])
+  for (const v of arr) {
+    let idx = Math.floor(v * n)
+    if (idx >= n) idx = n - 1
+    buckets[idx].push(v)
+  }
+  for (const bucket of buckets) insertionSortBucket(bucket)
+  const result = []
+  for (const bucket of buckets) for (const v of bucket) result.push(v)
+  return result
+}
+const bucketSortCases = [
+  [[[0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68]], [0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94]],
+  [[[]], []],
+  [[[0.5]], [0.5]],
+  [[[0.9, 0.9, 0.1]], [0.1, 0.9, 0.9]],
+  [[[0.1, 0.2, 0.3]], [0.1, 0.2, 0.3]],
+]
+for (const [args, exp] of bucketSortCases) {
+  check('bucketSortOptimal', bucketSortOptimal(...args), exp)
+}
+
 console.log(`\n${pass} passed, ${fail} failed`)
 process.exit(fail ? 1 : 0)

@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# verify/ dev-time compile artifacts (gcc/g++/javac output — not shipped)
+verify/*.class
+verify/verify_c
+verify/verify_c.exe
+verify/verify_cpp
+verify/verify_cpp.exe

@@ -380,6 +380,112 @@ public class Verify {
         }
     }
 
+    // =====================================================================
+    // 17. HEAPSORT — optimal: in-place binary heap, O(n log n)/O(1)
+    // =====================================================================
+    static int[] heapSort(int[] arr) {
+        int[] a = arr.clone();
+        int n = a.length;
+        for (int i = n / 2 - 1; i >= 0; i--) heapify(a, n, i);
+        for (int i = n - 1; i > 0; i--) {
+            int t = a[0]; a[0] = a[i]; a[i] = t;
+            heapify(a, i, 0);
+        }
+        return a;
+    }
+    static void heapify(int[] a, int size, int i) {
+        int largest = i, l = 2 * i + 1, r = 2 * i + 2;
+        if (l < size && a[l] > a[largest]) largest = l;
+        if (r < size && a[r] > a[largest]) largest = r;
+        if (largest != i) {
+            int t = a[i]; a[i] = a[largest]; a[largest] = t;
+            heapify(a, size, largest);
+        }
+    }
+
+    // =====================================================================
+    // 18. INSERTION SORT — optimal: adaptive shift, O(n^2) worst/O(n) best
+    // =====================================================================
+    static int[] insertionSort(int[] arr) {
+        int[] a = arr.clone();
+        for (int i = 1; i < a.length; i++) {
+            int key = a[i];
+            int j = i - 1;
+            while (j >= 0 && a[j] > key) { a[j + 1] = a[j]; j--; }
+            a[j + 1] = key;
+        }
+        return a;
+    }
+
+    // =====================================================================
+    // 19. COUNTING SORT — optimal: O(n+k)/O(n+k)
+    // =====================================================================
+    static int[] countingSort(int[] arr) {
+        if (arr.length == 0) return new int[]{};
+        int max = arr[0];
+        for (int n : arr) max = Math.max(max, n);
+        int[] counts = new int[max + 1];
+        for (int n : arr) counts[n]++;
+        int[] result = new int[arr.length];
+        int idx = 0;
+        for (int v = 0; v <= max; v++) {
+            for (int c = 0; c < counts[v]; c++) result[idx++] = v;
+        }
+        return result;
+    }
+
+    // =====================================================================
+    // 20. RADIX SORT — optimal: LSD digit-by-digit, O(d*(n+k))
+    // =====================================================================
+    static int[] radixSort(int[] arr) {
+        if (arr.length == 0) return new int[]{};
+        int[] result = arr.clone();
+        int max = result[0];
+        for (int n : result) max = Math.max(max, n);
+        for (int exp = 1; max / exp > 0; exp *= 10) {
+            int[] counts = new int[10];
+            for (int n : result) counts[(n / exp) % 10]++;
+            for (int i = 1; i < 10; i++) counts[i] += counts[i - 1];
+            int[] output = new int[result.length];
+            for (int i = result.length - 1; i >= 0; i--) {
+                int digit = (result[i] / exp) % 10;
+                output[--counts[digit]] = result[i];
+            }
+            result = output;
+        }
+        return result;
+    }
+
+    // =====================================================================
+    // 21. BUCKET SORT — optimal: distribute + per-bucket insertion sort, O(n+k) average
+    // =====================================================================
+    static double[] bucketSort(double[] arr) {
+        int n = arr.length;
+        if (n == 0) return new double[]{};
+        List<List<Double>> buckets = new ArrayList<>();
+        for (int i = 0; i < n; i++) buckets.add(new ArrayList<>());
+        for (double v : arr) {
+            int idx = (int) (v * n);
+            if (idx >= n) idx = n - 1;
+            buckets.get(idx).add(v);
+        }
+        for (List<Double> bucket : buckets) {
+            for (int i = 1; i < bucket.size(); i++) {
+                double key = bucket.get(i);
+                int j = i - 1;
+                while (j >= 0 && bucket.get(j) > key) {
+                    bucket.set(j + 1, bucket.get(j));
+                    j--;
+                }
+                bucket.set(j + 1, key);
+            }
+        }
+        double[] result = new double[n];
+        int idx = 0;
+        for (List<Double> bucket : buckets) for (double v : bucket) result[idx++] = v;
+        return result;
+    }
+
     public static void main(String[] args) {
         // 1. Two Sum
         int[][][] twoSumInputs = {{{2, 7, 11, 15}, {9}}, {{3, 2, 4}, {6}}, {{3, 3}, {6}}, {{1, 2, 3, 4, 5}, {9}}};
@@ -489,6 +595,39 @@ public class Verify {
         t.insert("app");
         trieOut.add(t.search("app"));
         check("TrieOptimal", trieOut, List.of(true, false, true, true));
+
+        // 17-20. Heapsort / Insertion Sort / Counting Sort / Radix Sort (share sortCases)
+        for (int i = 0; i < sortCases.length; i++) {
+            check("heapSort", heapSort(sortCases[i]), sortExpected[i]);
+            check("insertionSort", insertionSort(sortCases[i]), sortExpected[i]);
+        }
+        int[][] countingCases = {{4, 2, 2, 8, 3, 3, 1}, {}, {1}, {5, 5, 5}, {0, 0, 3, 1, 2}};
+        int[][] countingExpected = {{1, 2, 2, 3, 3, 4, 8}, {}, {1}, {5, 5, 5}, {0, 0, 1, 2, 3}};
+        for (int i = 0; i < countingCases.length; i++) {
+            check("countingSort", countingSort(countingCases[i]), countingExpected[i]);
+        }
+        int[][] radixCases = {{170, 45, 75, 90, 802, 24, 2, 66}, {}, {5}, {100, 10, 1}, {0, 0, 0}};
+        int[][] radixExpected = {{2, 24, 45, 66, 75, 90, 170, 802}, {}, {5}, {1, 10, 100}, {0, 0, 0}};
+        for (int i = 0; i < radixCases.length; i++) {
+            check("radixSort", radixSort(radixCases[i]), radixExpected[i]);
+        }
+
+        // 21. Bucket Sort
+        double[][] bucketCases = {
+            {0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68},
+            {}, {0.5}, {0.9, 0.9, 0.1}, {0.1, 0.2, 0.3},
+        };
+        double[][] bucketExpected = {
+            {0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94},
+            {}, {0.5}, {0.1, 0.9, 0.9}, {0.1, 0.2, 0.3},
+        };
+        for (int i = 0; i < bucketCases.length; i++) {
+            List<Double> actual = new ArrayList<>();
+            for (double v : bucketSort(bucketCases[i])) actual.add(v);
+            List<Double> expected = new ArrayList<>();
+            for (double v : bucketExpected[i]) expected.add(v);
+            check("bucketSort", actual, expected);
+        }
 
         System.out.println("\n" + pass + " passed, " + fail + " failed");
         if (fail > 0) System.exit(1);

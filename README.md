@@ -21,7 +21,7 @@ then open `http://localhost:8000/`. (Firefox will actually run it directly from 
 
 ## Content
 
-16 hand-picked problems. Every **optimal** solution (all 5 languages) and every **naive/contrast** solution (JavaScript + Python) was independently compiled/run before being written into `data.js` — see `verify/`:
+21 hand-picked problems. Every **optimal** solution (all 5 languages) and every **naive/contrast** solution (JavaScript + Python) was independently compiled/run before being written into `data.js` — see `verify/`:
 
 - `verify/verify.mjs` — node, JS solutions
 - `verify/verify.py` — python, Python solutions

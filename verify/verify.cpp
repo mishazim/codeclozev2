@@ -360,6 +360,86 @@ public:
     }
 };
 
+// =====================================================================
+// 17. HEAPSORT — optimal: in-place binary heap, O(n log n)/O(1)
+// =====================================================================
+void heapify(vector<int>& a, int size, int i) {
+    int largest = i, l = 2 * i + 1, r = 2 * i + 2;
+    if (l < size && a[l] > a[largest]) largest = l;
+    if (r < size && a[r] > a[largest]) largest = r;
+    if (largest != i) { swap(a[i], a[largest]); heapify(a, size, largest); }
+}
+vector<int> heapSort(vector<int> arr) {
+    int n = (int)arr.size();
+    for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
+    for (int i = n - 1; i > 0; i--) { swap(arr[0], arr[i]); heapify(arr, i, 0); }
+    return arr;
+}
+
+// =====================================================================
+// 18. INSERTION SORT — optimal: adaptive shift, O(n^2) worst/O(n) best
+// =====================================================================
+vector<int> insertionSort(vector<int> arr) {
+    for (int i = 1; i < (int)arr.size(); i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) { arr[j + 1] = arr[j]; j--; }
+        arr[j + 1] = key;
+    }
+    return arr;
+}
+
+// =====================================================================
+// 19. COUNTING SORT — optimal: O(n+k)/O(n+k)
+// =====================================================================
+vector<int> countingSort(vector<int> arr) {
+    if (arr.empty()) return {};
+    int mx = *max_element(arr.begin(), arr.end());
+    vector<int> counts(mx + 1, 0);
+    for (int n : arr) counts[n]++;
+    vector<int> result;
+    for (int v = 0; v <= mx; v++) for (int c = 0; c < counts[v]; c++) result.push_back(v);
+    return result;
+}
+
+// =====================================================================
+// 20. RADIX SORT — optimal: LSD digit-by-digit, O(d*(n+k))
+// =====================================================================
+vector<int> radixSort(vector<int> arr) {
+    if (arr.empty()) return {};
+    int mx = *max_element(arr.begin(), arr.end());
+    for (int exp = 1; mx / exp > 0; exp *= 10) {
+        vector<int> counts(10, 0);
+        for (int n : arr) counts[(n / exp) % 10]++;
+        for (int i = 1; i < 10; i++) counts[i] += counts[i - 1];
+        vector<int> output(arr.size());
+        for (int i = (int)arr.size() - 1; i >= 0; i--) {
+            int digit = (arr[i] / exp) % 10;
+            output[--counts[digit]] = arr[i];
+        }
+        arr = output;
+    }
+    return arr;
+}
+
+// =====================================================================
+// 21. BUCKET SORT — optimal: distribute + per-bucket sort, O(n+k) average
+// =====================================================================
+vector<double> bucketSort(vector<double> arr) {
+    int n = (int)arr.size();
+    if (n == 0) return {};
+    vector<vector<double>> buckets(n);
+    for (double v : arr) {
+        int idx = (int)(v * n);
+        if (idx >= n) idx = n - 1;
+        buckets[idx].push_back(v);
+    }
+    for (auto& bucket : buckets) sort(bucket.begin(), bucket.end());
+    vector<double> result;
+    for (auto& bucket : buckets) for (double v : bucket) result.push_back(v);
+    return result;
+}
+
 int main() {
     // 1. Two Sum
     {
@@ -483,6 +563,36 @@ int main() {
         out.push_back(t.search("app"));
         ostringstream gs; for (bool b : out) gs << b << " ";
         check("TrieOptimal", gs.str(), string("1 0 1 1 "));
+    }
+    // 17+18. Heapsort / Insertion Sort (share sort cases)
+    {
+        vector<vector<int>> cases = {{5, 3, 8, 1, 9, 2}, {}, {1}, {2, 2, 1, 1}, {5, 4, 3, 2, 1}};
+        vector<vector<int>> expected = {{1, 2, 3, 5, 8, 9}, {}, {1}, {1, 1, 2, 2}, {1, 2, 3, 4, 5}};
+        for (size_t i = 0; i < cases.size(); i++) {
+            check("heapSort", heapSort(cases[i]), expected[i]);
+            check("insertionSort", insertionSort(cases[i]), expected[i]);
+        }
+    }
+    // 19. Counting Sort
+    {
+        check("countingSort", countingSort({4, 2, 2, 8, 3, 3, 1}), vector<int>{1, 2, 2, 3, 3, 4, 8});
+        check("countingSort-empty", countingSort({}), vector<int>{});
+        check("countingSort", countingSort({0, 0, 3, 1, 2}), vector<int>{0, 0, 1, 2, 3});
+    }
+    // 20. Radix Sort
+    {
+        check("radixSort", radixSort({170, 45, 75, 90, 802, 24, 2, 66}), vector<int>{2, 24, 45, 66, 75, 90, 170, 802});
+        check("radixSort-empty", radixSort({}), vector<int>{});
+        check("radixSort", radixSort({100, 10, 1}), vector<int>{1, 10, 100});
+        check("radixSort", radixSort({0, 0, 0}), vector<int>{0, 0, 0});
+    }
+    // 21. Bucket Sort
+    {
+        vector<double> b1 = {0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68};
+        vector<double> e1 = {0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94};
+        check("bucketSort", bucketSort(b1), e1);
+        check("bucketSort-empty", bucketSort({}), vector<double>{});
+        check("bucketSort", bucketSort({0.9, 0.9, 0.1}), vector<double>{0.1, 0.9, 0.9});
     }
 
     cout << "\n" << pass_ << " passed, " << fail_ << " failed\n";

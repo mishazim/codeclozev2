@@ -623,6 +623,165 @@ def run_trie(Impl):
 check("TrieOptimal", run_trie(TrieOptimal), [True, False, True, True])
 check("TrieNaive", run_trie(TrieNaive), [True, False, True, True])
 
+# =====================================================================
+# 17. HEAPSORT
+# =====================================================================
+def heap_sort_optimal(arr):
+    a = arr[:]
+    n = len(a)
+    def heapify(size, i):
+        largest = i
+        l, r = 2 * i + 1, 2 * i + 2
+        if l < size and a[l] > a[largest]:
+            largest = l
+        if r < size and a[r] > a[largest]:
+            largest = r
+        if largest != i:
+            a[i], a[largest] = a[largest], a[i]
+            heapify(size, largest)
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(n, i)
+    for i in range(n - 1, 0, -1):
+        a[0], a[i] = a[i], a[0]
+        heapify(i, 0)
+    return a
+
+def selection_sort_naive(arr):
+    a = arr[:]
+    for i in range(len(a)):
+        min_idx = i
+        for j in range(i + 1, len(a)):
+            if a[j] < a[min_idx]:
+                min_idx = j
+        a[i], a[min_idx] = a[min_idx], a[i]
+    return a
+
+for args, exp in sort_cases:
+    check("heap_sort_optimal", heap_sort_optimal(*args), exp)
+    check("selection_sort_naive", selection_sort_naive(*args), exp)
+
+# =====================================================================
+# 18. INSERTION SORT
+# =====================================================================
+def insertion_sort_optimal(arr):
+    a = arr[:]
+    for i in range(1, len(a)):
+        key = a[i]
+        j = i - 1
+        while j >= 0 and a[j] > key:
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = key
+    return a
+
+def bubble_sort_naive2(arr):
+    a = arr[:]
+    n = len(a)
+    for i in range(n):
+        for j in range(n - i - 1):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+    return a
+
+for args, exp in sort_cases:
+    check("insertion_sort_optimal", insertion_sort_optimal(*args), exp)
+    check("bubble_sort_naive2", bubble_sort_naive2(*args), exp)
+
+# =====================================================================
+# 19. COUNTING SORT
+# =====================================================================
+def counting_sort_optimal(arr):
+    if not arr:
+        return []
+    m = max(arr)
+    counts = [0] * (m + 1)
+    for n in arr:
+        counts[n] += 1
+    result = []
+    for v in range(m + 1):
+        result.extend([v] * counts[v])
+    return result
+
+counting_sort_cases = [
+    (([4, 2, 2, 8, 3, 3, 1],), [1, 2, 2, 3, 3, 4, 8]),
+    (([],), []),
+    (([1],), [1]),
+    (([5, 5, 5],), [5, 5, 5]),
+    (([0, 0, 3, 1, 2],), [0, 0, 1, 2, 3]),
+]
+for args, exp in counting_sort_cases:
+    check("counting_sort_optimal", counting_sort_optimal(*args), exp)
+
+# =====================================================================
+# 20. RADIX SORT
+# =====================================================================
+def radix_sort_optimal(arr):
+    if not arr:
+        return []
+    result = arr[:]
+    m = max(result)
+    exp = 1
+    while m // exp > 0:
+        counts = [0] * 10
+        for n in result:
+            counts[(n // exp) % 10] += 1
+        for i in range(1, 10):
+            counts[i] += counts[i - 1]
+        output = [0] * len(result)
+        for i in range(len(result) - 1, -1, -1):
+            digit = (result[i] // exp) % 10
+            counts[digit] -= 1
+            output[counts[digit]] = result[i]
+        result = output
+        exp *= 10
+    return result
+
+radix_sort_cases = [
+    (([170, 45, 75, 90, 802, 24, 2, 66],), [2, 24, 45, 66, 75, 90, 170, 802]),
+    (([],), []),
+    (([5],), [5]),
+    (([100, 10, 1],), [1, 10, 100]),
+    (([0, 0, 0],), [0, 0, 0]),
+]
+for args, exp in radix_sort_cases:
+    check("radix_sort_optimal", radix_sort_optimal(*args), exp)
+
+# =====================================================================
+# 21. BUCKET SORT
+# =====================================================================
+def bucket_sort_optimal(arr):
+    n = len(arr)
+    if n == 0:
+        return []
+    buckets = [[] for _ in range(n)]
+    for v in arr:
+        idx = int(v * n)
+        if idx >= n:
+            idx = n - 1
+        buckets[idx].append(v)
+    for bucket in buckets:
+        for i in range(1, len(bucket)):
+            key = bucket[i]
+            j = i - 1
+            while j >= 0 and bucket[j] > key:
+                bucket[j + 1] = bucket[j]
+                j -= 1
+            bucket[j + 1] = key
+    result = []
+    for bucket in buckets:
+        result.extend(bucket)
+    return result
+
+bucket_sort_cases = [
+    (([0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68],), [0.12, 0.17, 0.21, 0.23, 0.26, 0.39, 0.68, 0.72, 0.78, 0.94]),
+    (([],), []),
+    (([0.5],), [0.5]),
+    (([0.9, 0.9, 0.1],), [0.1, 0.9, 0.9]),
+    (([0.1, 0.2, 0.3],), [0.1, 0.2, 0.3]),
+]
+for args, exp in bucket_sort_cases:
+    check("bucket_sort_optimal", bucket_sort_optimal(*args), exp)
+
 print(f"\n{results['pass']} passed, {results['fail']} failed")
 import sys
 sys.exit(1 if results["fail"] else 0)
