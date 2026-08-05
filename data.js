@@ -1525,6 +1525,77 @@ const PROBLEMS = [
       'Forgetting to clamp the bucket index \u2014 a value at the very top of the range, or floating-point rounding, can compute idx == n, one past the last bucket',
     ],
   },
+
+  // ===================================================================
+  // 22. BUBBLE SORT
+  // ===================================================================
+  {
+    id: 'bubble-sort',
+    name: 'Bubble Sort',
+    category: 'algorithms',
+    difficulty: 'easy',
+    description: 'Sort an array of integers in ascending order and return the sorted array, by repeatedly swapping adjacent out-of-order elements.',
+    constraints: ['0 <= arr.length <= 10^4'],
+    examples: [{ input: 'arr = [5,3,8,1,9,2]', output: '[1,2,3,5,8,9]' }],
+    io: { kind: 'function', name: 'bubbleSort' },
+    testCases: [
+      { args: [[5, 3, 8, 1, 9, 2]], expected: [1, 2, 3, 5, 8, 9] },
+      { args: [[]], expected: [] },
+      { args: [[1]], expected: [1] },
+      { args: [[2, 2, 1, 1]], expected: [1, 1, 2, 2] },
+      { args: [[5, 4, 3, 2, 1]], expected: [1, 2, 3, 4, 5] },
+    ],
+    languages: {
+      javascript: { starter: 'function bubbleSort(arr) {\n  \n}', requiredOptimal: [], requiredNaive: [] },
+      python: {
+        starter: 'def bubble_sort(arr):\n    pass',
+        requiredOptimal: [/swapped/i, /break/],
+        requiredNaive: [/min_idx|min_i\b/i, /for .+ in range\(i\s*\+\s*1/],
+      },
+      java: {
+        starter: 'static int[] bubbleSort(int[] arr) {\n    \n}',
+        requiredOptimal: [/swapped/i, /break/],
+      },
+      c: {
+        starter: 'void bubbleSort(int* arr, int n) {\n    \n}',
+        requiredOptimal: [/swapped/i, /break/],
+      },
+      cpp: {
+        starter: 'vector<int> bubbleSort(vector<int> arr) {\n    \n}',
+        requiredOptimal: [/swapped/i, /break/],
+      },
+    },
+    optimal: {
+      time: 'O(n^2) worst, O(n) best (already sorted)', space: 'O(1)',
+      explanation: 'Repeatedly sweep adjacent pairs and swap out-of-order ones, shrinking the unsorted region by one each pass; track whether any swap happened during a pass and stop early if not. An already-sorted array finishes in a single O(n) pass instead of the full O(n^2) sweep count \u2014 this early-exit check is what makes bubble sort adaptive, though reverse-sorted input still costs O(n^2) since every pass finds a swap.',
+      code: {
+        javascript: `function bubbleSort(arr) {\n  const a = arr.slice()\n  for (let i = 0; i < a.length; i++) {\n    let swapped = false\n    for (let j = 0; j < a.length - i - 1; j++) {\n      if (a[j] > a[j + 1]) {\n        [a[j], a[j + 1]] = [a[j + 1], a[j]]\n        swapped = true\n      }\n    }\n    if (!swapped) break\n  }\n  return a\n}`,
+        python: `def bubble_sort(arr):\n    a = arr[:]\n    n = len(a)\n    for i in range(n):\n        swapped = False\n        for j in range(n - i - 1):\n            if a[j] > a[j + 1]:\n                a[j], a[j + 1] = a[j + 1], a[j]\n                swapped = True\n        if not swapped:\n            break\n    return a`,
+        java: `static int[] bubbleSort(int[] arr) {\n    int[] a = arr.clone();\n    for (int i = 0; i < a.length; i++) {\n        boolean swapped = false;\n        for (int j = 0; j < a.length - i - 1; j++) {\n            if (a[j] > a[j + 1]) {\n                int t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n                swapped = true;\n            }\n        }\n        if (!swapped) break;\n    }\n    return a;\n}`,
+        c: `void bubbleSort(int* arr, int n) {\n    for (int i = 0; i < n; i++) {\n        int swapped = 0;\n        for (int j = 0; j < n - i - 1; j++) {\n            if (arr[j] > arr[j + 1]) {\n                int t = arr[j]; arr[j] = arr[j + 1]; arr[j + 1] = t;\n                swapped = 1;\n            }\n        }\n        if (!swapped) break;\n    }\n}`,
+        cpp: `vector<int> bubbleSort(vector<int> arr) {\n    for (int i = 0; i < (int)arr.size(); i++) {\n        bool swapped = false;\n        for (int j = 0; j < (int)arr.size() - i - 1; j++) {\n            if (arr[j] > arr[j + 1]) {\n                swap(arr[j], arr[j + 1]);\n                swapped = true;\n            }\n        }\n        if (!swapped) break;\n    }\n    return arr;\n}`,
+      },
+    },
+    naive: {
+      time: 'O(n^2)', space: 'O(1)',
+      code: {
+        javascript: `function bubbleSort(arr) {\n  const a = arr.slice()\n  for (let i = 0; i < a.length; i++) {\n    let minIdx = i\n    for (let j = i + 1; j < a.length; j++) {\n      if (a[j] < a[minIdx]) minIdx = j\n    }\n    [a[i], a[minIdx]] = [a[minIdx], a[i]]\n  }\n  return a\n}`,
+        python: `def bubble_sort(arr):\n    a = arr[:]\n    n = len(a)\n    for i in range(n):\n        min_idx = i\n        for j in range(i + 1, n):\n            if a[j] < a[min_idx]:\n                min_idx = j\n        a[i], a[min_idx] = a[min_idx], a[i]\n    return a`,
+      },
+    },
+    useCases: [
+      'Teaching sorting fundamentals due to its simplicity \u2014 rarely chosen in production since insertion sort dominates it at every input size (fewer writes, same comparison count)',
+      'Cheaply detecting whether a small or nearly-sorted array is already sorted, since the early-exit variant finishes in one O(n) pass when no swaps are needed',
+    ],
+    hints: [
+      'Selection sort scans the whole unsorted region for the minimum on every pass; can you instead compare and swap only adjacent elements, one pair at a time?',
+      'Track whether any swap happened during a full pass over the array \u2014 if none did, the array is already sorted and you can stop early instead of running all n passes.',
+    ],
+    commonMistakes: [
+      'Omitting the early-exit `swapped` flag, which makes best-case performance the same O(n^2) as worst-case even on already-sorted input',
+      'Forgetting to shrink the inner loop bound each pass (`n - i - 1`), causing redundant comparisons against elements already bubbled into place at the end',
+    ],
+  },
 ]
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { PROBLEMS }
